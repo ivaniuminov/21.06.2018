@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class MainServlet extends HttpServlet {
 
@@ -18,7 +20,12 @@ public class MainServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        controllerMap.put(new Request("GET", "/servlet/categories"), new GetAllCategoriesController());
+        controllerMap.put(new Request("GET", "/servlet/categories"), Factory.getAllCategoriesController());
+        controllerMap.put(new Request("GET", "/servlet/category"), Factory.getCategoryById());
+        controllerMap.put(new Request("POST", "/servlet/signup"), Factory.getSignUpController());
+        controllerMap.put(new Request("GET", "/servlet/signup"), processView().apply("signup"));
+        controllerMap.put(new Request("POST", "/servlet/login"), Factory.getLoginController());
+        controllerMap.put(new Request("GET", "/servlet/login"), processView().apply("login"));
     }
 
     @Override
@@ -43,7 +50,7 @@ public class MainServlet extends HttpServlet {
     private void processRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Request request = new Request(req.getMethod(), req.getRequestURI());
 
-        controllerMap.getOrDefault(request, this::process404)
+        controllerMap.getOrDefault(request, processView().apply("404"))
                 .process(req, resp);
 
 
@@ -67,15 +74,43 @@ public class MainServlet extends HttpServlet {
         }*/
     }
 
-    private void process404(HttpServletRequest req, HttpServletResponse resp) {
+    /*private void process404(HttpServletRequest req, HttpServletResponse resp) {
         try {
             req.getRequestDispatcher("/WEB-INF/views/404.jsp").forward(req, resp);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }*/
+
+    private void processSignUp(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            req.getRequestDispatcher("/WEB-INF/vies/signup/404.jsp").forward(req, resp);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
-    private void processParams(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    /*private Consumer<String> process404(HttpServletRequest req, HttpServletResponse resp) {
+        return x -> {
+            try {
+                req.getRequestDispatcher(String.format("/WEB-INF/%s/404.jsp", x)).forward(req, resp);
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        };
+    }*/
+
+    private Function<String, Controller> processView() {
+        return x -> (req, resp) -> {
+            try {
+                req.getRequestDispatcher(String.format("/WEB-INF/views/%s.jsp", x)).forward(req, resp);
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        };
+    }
+
+    /*private void processParams(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, String[]> params = req.getParameterMap();
         String response = params.entrySet().stream()
                 .flatMap(e -> Arrays.stream(e.getValue()))  // можно Stream.of(e.getValue())
@@ -91,5 +126,5 @@ public class MainServlet extends HttpServlet {
         req.setAttribute("password", req.getParameter("password"));
 
         req.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(req, resp);
-    }
+    }*/
 }

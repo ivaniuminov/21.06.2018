@@ -1,25 +1,25 @@
 package com.iuminov.controller;
 
 import com.iuminov.service.CategoryService;
-import com.iuminov.service.CategoryServiceImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class GetAllCategoriesController implements Controller {
+public class GetCategoryById implements Controller{
 
     private final CategoryService categoryService;
 
-    public GetAllCategoriesController(CategoryService categoryService) {
+    public GetCategoryById(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
     @Override
     public void process(HttpServletRequest req, HttpServletResponse resp) {
-        req.setAttribute("categories", categoryService.getAll());
+        Long id = Long.parseLong(req.getParameter("c_id"));
+        req.setAttribute("category", categoryService.getById(id));
 
         try {
-            req.getRequestDispatcher("/WEB-INF/views/categories.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/category.jsp").forward(req, resp);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
