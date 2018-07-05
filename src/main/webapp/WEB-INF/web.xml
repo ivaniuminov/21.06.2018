@@ -14,4 +14,14 @@
         <url-pattern>/servlet/*</url-pattern>
     </servlet-mapping>
 
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>com.iuminov.AuthFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <servlet-name>MainServlet</servlet-name>
+    </filter-mapping>
+
 </web-app>

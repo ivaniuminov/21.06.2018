@@ -1,17 +1,15 @@
 package com.iuminov;
 
 import com.iuminov.controller.Controller;
-import com.iuminov.controller.GetAllCategoriesController;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class MainServlet extends HttpServlet {
@@ -26,6 +24,8 @@ public class MainServlet extends HttpServlet {
         controllerMap.put(new Request("GET", "/servlet/signup"), processView().apply("signup"));
         controllerMap.put(new Request("POST", "/servlet/login"), Factory.getLoginController());
         controllerMap.put(new Request("GET", "/servlet/login"), processView().apply("login"));
+        controllerMap.put(new Request("GET", "/servlet/profile"), processView().apply("profile"));
+        controllerMap.put(new Request("GET", "/servlet/logout"), this::processLogout);
     }
 
     @Override
@@ -85,6 +85,25 @@ public class MainServlet extends HttpServlet {
     private void processSignUp(HttpServletRequest req, HttpServletResponse resp) {
         try {
             req.getRequestDispatcher("/WEB-INF/vies/signup/404.jsp").forward(req, resp);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private void processLogout(HttpServletRequest req, HttpServletResponse resp) {
+        final String COOKIES_NAME = "MyApp";
+        Cookie[] cookies = req.getCookies();
+
+        for (Cookie c : cookies) {
+            if (c.getName().equals(COOKIES_NAME)) {
+                Cookie nullCookie = new Cookie(COOKIES_NAME, null);
+                resp.addCookie(nullCookie);
+                break;
+            }
+        }
+
+        try {
+            req.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(req, resp);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
